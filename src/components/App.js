@@ -3,6 +3,8 @@ import { connect } from 'react-redux' // so that we can connect this component t
 import { addRecipe, removeFromCalendar } from '../actions'
 import logo from '../logo.svg';
 import '../App.css';
+import { capitalize } from '../utils/helpers'
+import CalendarIcon from 'react-icons/lib/fa/calendar-plus-o'
 
 // My main component
 class App extends Component {
@@ -12,11 +14,45 @@ class App extends Component {
   }
 
   render() {
-    console.log('Props', this.props)
+    //console.log('Props', this.props)
+    const { calendar, remove } = this.props
+    const mealOrder = ['breakfast', 'lunch', 'dinner']
+
     return (
-      <div>
-        Hello World
-      </div>
+      <div className='container'>
+        <ul className='meal-types'>
+          {mealOrder.map((mealType) => (
+            <li key={mealType} className='subheader'>
+              {capitalize(mealType)}
+            </li>
+          ))}
+        </ul>
+
+        <div className='calendar'>
+          <div className='days'>
+            {calendar.map(({ day }) => <h3 key={day} className='subheader'>{capitalize(day)}</h3>)}
+          </div>
+          <div className='icon-grid'>
+            {calendar.map(({ day, meals }) => (
+              <ul key={day}>
+                {mealOrder.map((meal) => (
+                  <li key={meal} className='meal'>
+                    {meals[meal]
+                      ? <div className='food-item'>
+                        <img src={meals[meal].image} alt={meals[meal].label} />
+                        <button onClick={() => remove({ meal, day })}>Clear</button>
+                      </div>
+                      : <button className='icon-btn'>
+                        <CalendarIcon size={30} />
+                      </button>}
+                  </li>
+                ))}
+              </ul>
+            ))}
+          </div>
+        </div>
+
+      </div>		       
     );
   }
 }
@@ -24,7 +60,7 @@ class App extends Component {
 // map the state to the props, so this component has access to the store
 // the store is a object, but we need the props to be a array so work it into an array
 // whatever we return from the function will be mapped to props and usable to the component
-function mapStateToProps(calendar) {
+function mapStateToProps({ food, calendar }) {
   //console.log("test")
   //console.log(calendar)
   const dayOrder = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
@@ -40,7 +76,7 @@ function mapStateToProps(calendar) {
         //console.log(meals[meal])
         //console.log(calendar[day])
         meals[meal] = calendar[day][meal] // adding a meal key and setting it to something, then adding it to the meals object
-          ? calendar[day][meal]
+          ? food[calendar[day][meal]]
           : null
 
         //console.log(meals)
